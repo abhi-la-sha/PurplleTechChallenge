@@ -1,0 +1,2 @@
+# Optional: dataset / video inspection scripts (Phase 0)
+opencv-python>=4.8.0
