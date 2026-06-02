@@ -1,5 +1,12 @@
 from app.schemas.camera import CameraBase, CameraCreate, CameraRead
-from app.schemas.event import EventBase, EventCreate, EventRead
+from app.schemas.event import (
+    EventBase,
+    EventBulkCreateRequest,
+    EventCreate,
+    EventListResponse,
+    EventRead,
+    EventStatsResponse,
+)
 from app.schemas.health import HealthResponse
 from app.schemas.root import RootResponse
 from app.schemas.transaction import TransactionBase, TransactionCreate, TransactionRead
@@ -15,8 +22,11 @@ __all__ = [
     "CameraCreate",
     "CameraRead",
     "EventBase",
+    "EventBulkCreateRequest",
     "EventCreate",
+    "EventListResponse",
     "EventRead",
+    "EventStatsResponse",
     "HealthResponse",
     "RootResponse",
     "TransactionBase",

@@ -1,8 +1,9 @@
 
-import uuid
-from datetime import datetime
+from __future__ import annotations
 
-from sqlalchemy import select
+import uuid
+
+from sqlalchemy import Select, func, select
 
 from app.models.enums import EventType
 from app.models.event import Event
@@ -16,23 +17,56 @@ class EventRepository(BaseRepository):
         await self._session.refresh(event)
         return event
 
+    async def create_many(self, events: list[Event]) -> int:
+        if not events:
+            return 0
+        self._session.add_all(events)
+        await self._session.flush()
+        return len(events)
+
     async def get_by_id(self, event_id: uuid.UUID) -> Event | None:
         return await self._session.get(Event, event_id)
 
-    async def list_by_visitor(
+    async def list(
         self,
-        visitor_id: str,
         *,
+        visitor_id: str | None = None,
+        event_type: EventType | None = None,
+        camera_id: uuid.UUID | None = None,
+        zone_id: uuid.UUID | None = None,
+        session_id: uuid.UUID | None = None,
         limit: int = 100,
+        offset: int = 0,
     ) -> list[Event]:
-        stmt = (
-            select(Event)
-            .where(Event.visitor_id == visitor_id)
-            .order_by(Event.timestamp.desc())
-            .limit(limit)
-        )
+        stmt = self._filtered_query(
+            visitor_id=visitor_id,
+            event_type=event_type,
+            camera_id=camera_id,
+            zone_id=zone_id,
+            session_id=session_id,
+        ).order_by(Event.timestamp.desc())
+        stmt = stmt.offset(offset).limit(limit)
         result = await self._session.execute(stmt)
         return list(result.scalars().all())
+
+    async def count(
+        self,
+        *,
+        visitor_id: str | None = None,
+        event_type: EventType | None = None,
+        camera_id: uuid.UUID | None = None,
+        zone_id: uuid.UUID | None = None,
+        session_id: uuid.UUID | None = None,
+    ) -> int:
+        stmt = self._filtered_query(
+            visitor_id=visitor_id,
+            event_type=event_type,
+            camera_id=camera_id,
+            zone_id=zone_id,
+            session_id=session_id,
+        ).with_only_columns(func.count(Event.id))
+        result = await self._session.execute(stmt)
+        return int(result.scalar_one())
 
     async def list_by_session(self, session_id: uuid.UUID) -> list[Event]:
         stmt = (
@@ -43,23 +77,36 @@ class EventRepository(BaseRepository):
         result = await self._session.execute(stmt)
         return list(result.scalars().all())
 
-    async def list_by_type_and_range(
-        self,
-        event_type: EventType,
-        start: datetime,
-        end: datetime,
-    ) -> list[Event]:
+    async def exists(self, event_id: uuid.UUID) -> bool:
         stmt = (
-            select(Event)
-            .where(
-                Event.event_type == event_type,
-                Event.timestamp >= start,
-                Event.timestamp <= end,
-            )
-            .order_by(Event.timestamp.asc())
+            select(func.count(Event.id))
+            .where(Event.id == event_id)
+            .with_only_columns(func.count(Event.id))
         )
         result = await self._session.execute(stmt)
-        return list(result.scalars().all())
+        return int(result.scalar_one()) > 0
+
+    def _filtered_query(
+        self,
+        *,
+        visitor_id: str | None = None,
+        event_type: EventType | None = None,
+        camera_id: uuid.UUID | None = None,
+        zone_id: uuid.UUID | None = None,
+        session_id: uuid.UUID | None = None,
+    ) -> Select[tuple[Event]]:
+        stmt: Select[tuple[Event]] = select(Event)
+        if visitor_id is not None:
+            stmt = stmt.where(Event.visitor_id == visitor_id)
+        if event_type is not None:
+            stmt = stmt.where(Event.event_type == event_type)
+        if camera_id is not None:
+            stmt = stmt.where(Event.camera_id == camera_id)
+        if zone_id is not None:
+            stmt = stmt.where(Event.zone_id == zone_id)
+        if session_id is not None:
+            stmt = stmt.where(Event.session_id == session_id)
+        return stmt
 
     async def delete(self, event_id: uuid.UUID) -> bool:
         event = await self.get_by_id(event_id)

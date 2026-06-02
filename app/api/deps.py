@@ -6,7 +6,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import Settings, get_settings
 from app.db.session import get_async_session
+from app.repositories.event import EventRepository
 from app.repositories.health import HealthRepository
+from app.services.event import EventService
 from app.services.health import HealthService
 from app.services.placeholder import PlaceholderService
 from app.services.root import RootService
@@ -41,3 +43,17 @@ def get_placeholder_service() -> PlaceholderService:
 
 
 PlaceholderServiceDep = Annotated[PlaceholderService, Depends(get_placeholder_service)]
+
+
+def get_event_repository(session: SessionDep) -> EventRepository:
+    return EventRepository(session)
+
+
+EventRepositoryDep = Annotated[EventRepository, Depends(get_event_repository)]
+
+
+def get_event_service(repository: EventRepositoryDep) -> EventService:
+    return EventService(repository)
+
+
+EventServiceDep = Annotated[EventService, Depends(get_event_service)]

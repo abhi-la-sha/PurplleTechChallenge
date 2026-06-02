@@ -27,3 +27,18 @@ class EventCreate(EventBase):
 class EventRead(EventBase):
     id: uuid.UUID
     created_at: datetime
+
+
+class EventListResponse(APISchema):
+    items: list[EventRead]
+    total: int
+    limit: int
+    offset: int
+
+
+class EventBulkCreateRequest(APISchema):
+    events: list[EventCreate] = Field(..., min_length=1)
+
+
+class EventStatsResponse(APISchema):
+    total_events: int
