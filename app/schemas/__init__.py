@@ -10,7 +10,13 @@ from app.schemas.event import (
 from app.schemas.health import HealthResponse
 from app.schemas.metrics import MetricsResponse
 from app.schemas.root import RootResponse
-from app.schemas.transaction import TransactionBase, TransactionCreate, TransactionRead
+from app.schemas.transaction import (
+    TransactionBulkCreateRequest,
+    TransactionBulkCreateResponse,
+    TransactionCreate,
+    TransactionListResponse,
+    TransactionRead,
+)
 from app.schemas.visitor_session import (
     VisitorSessionBase,
     VisitorSessionCreate,
@@ -31,8 +37,10 @@ __all__ = [
     "HealthResponse",
     "MetricsResponse",
     "RootResponse",
-    "TransactionBase",
+    "TransactionBulkCreateRequest",
+    "TransactionBulkCreateResponse",
     "TransactionCreate",
+    "TransactionListResponse",
     "TransactionRead",
     "VisitorSessionBase",
     "VisitorSessionCreate",

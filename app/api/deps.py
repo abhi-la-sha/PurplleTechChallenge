@@ -9,9 +9,11 @@ from app.db.session import get_async_session
 from app.repositories.event import EventRepository
 from app.repositories.health import HealthRepository
 from app.repositories.metrics import MetricsRepository
+from app.repositories.transaction import TransactionRepository
 from app.services.event import EventService
 from app.services.health import HealthService
 from app.services.metrics import MetricsService
+from app.services.transaction import TransactionService
 from app.services.placeholder import PlaceholderService
 from app.services.root import RootService
 
@@ -73,3 +75,20 @@ def get_metrics_service(repository: MetricsRepositoryDep) -> MetricsService:
 
 
 MetricsServiceDep = Annotated[MetricsService, Depends(get_metrics_service)]
+
+
+def get_transaction_repository(session: SessionDep) -> TransactionRepository:
+    return TransactionRepository(session)
+
+
+TransactionRepositoryDep = Annotated[
+    TransactionRepository,
+    Depends(get_transaction_repository),
+]
+
+
+def get_transaction_service(repository: TransactionRepositoryDep) -> TransactionService:
+    return TransactionService(repository)
+
+
+TransactionServiceDep = Annotated[TransactionService, Depends(get_transaction_service)]

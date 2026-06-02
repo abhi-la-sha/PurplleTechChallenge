@@ -76,15 +76,18 @@ async def test_event_read_from_orm(db_session) -> None:
 
 
 def test_transaction_schema() -> None:
+    now = datetime.now(UTC)
     txn = TransactionCreate(
+        store_id="STORE_BLR_002",
         transaction_id="TX-42",
-        transaction_timestamp=datetime.now(UTC),
+        timestamp=now,
         basket_value=Decimal("42.50"),
     )
     read = TransactionRead(
         id=uuid.uuid4(),
-        created_at=datetime.now(UTC),
-        updated_at=datetime.now(UTC),
+        created_at=now,
+        updated_at=now,
         **txn.model_dump(),
     )
     assert read.transaction_id == "TX-42"
+    assert read.store_id == "STORE_BLR_002"
