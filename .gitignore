@@ -18,8 +18,6 @@ postgres_data/
 analysis_frames/
 .cursorrules
 *.db
-*.sqlite
-*.sqlite3
 alembic/__pycache__/
 data/videos/
 analysis_frames/*

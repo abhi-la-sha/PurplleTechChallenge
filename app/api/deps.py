@@ -8,8 +8,10 @@ from app.core.config import Settings, get_settings
 from app.db.session import get_async_session
 from app.repositories.event import EventRepository
 from app.repositories.health import HealthRepository
+from app.repositories.metrics import MetricsRepository
 from app.services.event import EventService
 from app.services.health import HealthService
+from app.services.metrics import MetricsService
 from app.services.placeholder import PlaceholderService
 from app.services.root import RootService
 
@@ -57,3 +59,17 @@ def get_event_service(repository: EventRepositoryDep) -> EventService:
 
 
 EventServiceDep = Annotated[EventService, Depends(get_event_service)]
+
+
+def get_metrics_repository(session: SessionDep) -> MetricsRepository:
+    return MetricsRepository(session)
+
+
+MetricsRepositoryDep = Annotated[MetricsRepository, Depends(get_metrics_repository)]
+
+
+def get_metrics_service(repository: MetricsRepositoryDep) -> MetricsService:
+    return MetricsService(repository)
+
+
+MetricsServiceDep = Annotated[MetricsService, Depends(get_metrics_service)]

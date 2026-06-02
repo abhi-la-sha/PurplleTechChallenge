@@ -6,7 +6,7 @@ from httpx import AsyncClient
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
     "path",
-    ["/metrics", "/funnel", "/anomalies", "/heatmap"],
+    ["/funnel", "/anomalies", "/heatmap"],
 )
 async def test_placeholder_returns_501(client: AsyncClient, path: str) -> None:
     response = await client.get(path)

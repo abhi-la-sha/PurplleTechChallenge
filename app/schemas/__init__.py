@@ -8,6 +8,7 @@ from app.schemas.event import (
     EventStatsResponse,
 )
 from app.schemas.health import HealthResponse
+from app.schemas.metrics import MetricsResponse
 from app.schemas.root import RootResponse
 from app.schemas.transaction import TransactionBase, TransactionCreate, TransactionRead
 from app.schemas.visitor_session import (
@@ -28,6 +29,7 @@ __all__ = [
     "EventRead",
     "EventStatsResponse",
     "HealthResponse",
+    "MetricsResponse",
     "RootResponse",
     "TransactionBase",
     "TransactionCreate",

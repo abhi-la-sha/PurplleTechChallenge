@@ -1,12 +1,12 @@
 
 from fastapi import APIRouter
 
-from app.api.deps import PlaceholderServiceDep
+from app.api.deps import MetricsServiceDep
+from app.schemas.metrics import MetricsResponse
 
 router = APIRouter(prefix="/metrics", tags=["metrics"])
 
 
-@router.api_route("", methods=["GET", "POST", "PUT", "PATCH", "DELETE"])
-@router.api_route("/{path:path}", methods=["GET", "POST", "PUT", "PATCH", "DELETE"])
-async def metrics_not_implemented(service: PlaceholderServiceDep) -> None:
-    await service.not_implemented()
+@router.get("", response_model=MetricsResponse)
+async def get_metrics(service: MetricsServiceDep) -> MetricsResponse:
+    return await service.get_metrics()

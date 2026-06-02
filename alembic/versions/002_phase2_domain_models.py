@@ -24,7 +24,11 @@ EVENT_TYPE_VALUES = (
 
 
 def upgrade() -> None:
-    event_type_enum = sa.Enum(*EVENT_TYPE_VALUES, name="event_type_enum")
+    event_type_enum = postgresql.ENUM(
+        *EVENT_TYPE_VALUES,
+        name="event_type_enum",
+        create_type=False,
+    )
     event_type_enum.create(op.get_bind(), checkfirst=True)
 
     op.create_table(
