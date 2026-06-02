@@ -1,4 +1,3 @@
-"""FastAPI dependency injection wiring."""
 
 from typing import Annotated
 

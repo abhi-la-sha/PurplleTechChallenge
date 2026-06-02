@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-"""Lightweight video inspection: metadata to stdout, middle frame to analysis_frames/."""
 
 from pathlib import Path
 

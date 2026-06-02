@@ -1,4 +1,3 @@
-"""Anomaly detection API placeholder (Phase 9)."""
 
 from fastapi import APIRouter
 

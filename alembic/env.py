@@ -1,4 +1,3 @@
-"""Alembic migration environment (async-compatible metadata)."""
 
 import asyncio
 from logging.config import fileConfig
@@ -10,7 +9,13 @@ from sqlalchemy.ext.asyncio import create_async_engine
 
 from app.core.config import get_settings
 from app.db.base import Base
-from app.models import base as models_base  # noqa: F401 — register mixins / metadata
+from app.models import (  # noqa: F401 — register ORM metadata
+    Camera,
+    Event,
+    Transaction,
+    VisitorSession,
+    Zone,
+)
 
 config = context.config
 settings = get_settings()

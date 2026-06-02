@@ -1,4 +1,3 @@
-"""Metrics API placeholder (Phase 5)."""
 
 from fastapi import APIRouter
 

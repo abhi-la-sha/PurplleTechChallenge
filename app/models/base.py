@@ -1,4 +1,3 @@
-"""Shared ORM base classes and mixins (no business entities in Phase 1)."""
 
 import uuid
 from datetime import datetime

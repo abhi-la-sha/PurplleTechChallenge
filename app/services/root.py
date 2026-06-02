@@ -1,4 +1,3 @@
-"""Root metadata service."""
 
 from app.core.config import Settings
 from app.schemas.root import RootResponse

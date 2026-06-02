@@ -1,4 +1,3 @@
-"""HTTP middleware for structured request logging."""
 
 import logging
 import time

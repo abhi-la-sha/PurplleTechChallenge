@@ -1,4 +1,3 @@
-"""Placeholder route tests."""
 
 import pytest
 from httpx import AsyncClient

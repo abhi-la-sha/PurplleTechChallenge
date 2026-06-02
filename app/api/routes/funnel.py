@@ -1,4 +1,3 @@
-"""Funnel analytics API placeholder (Phase 8)."""
 
 from fastapi import APIRouter
 

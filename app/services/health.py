@@ -1,4 +1,3 @@
-"""Health check service."""
 
 from app.repositories.health import HealthRepository
 from app.schemas.health import HealthResponse

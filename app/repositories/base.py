@@ -1,4 +1,3 @@
-"""Base repository for data access layer."""
 
 from sqlalchemy.ext.asyncio import AsyncSession
 

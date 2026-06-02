@@ -1,4 +1,3 @@
-"""Heatmap API placeholder (Phase 6)."""
 
 from fastapi import APIRouter
 

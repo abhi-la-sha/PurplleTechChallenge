@@ -1,4 +1,3 @@
-"""Events API placeholder (Phase 3)."""
 
 from fastapi import APIRouter
 

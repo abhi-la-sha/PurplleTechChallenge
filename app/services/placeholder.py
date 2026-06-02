@@ -1,4 +1,3 @@
-"""Placeholder service for routes not yet implemented."""
 
 from fastapi import HTTPException, status
 

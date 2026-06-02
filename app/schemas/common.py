@@ -1,4 +1,3 @@
-"""Shared API schema types."""
 
 from pydantic import BaseModel, ConfigDict
 

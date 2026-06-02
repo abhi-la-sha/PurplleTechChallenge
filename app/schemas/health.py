@@ -1,4 +1,3 @@
-"""Health endpoint schemas."""
 
 from typing import Literal
 

@@ -110,9 +110,17 @@ alembic/         # Migrations
 tests/
 ```
 
+## Phase 2 — Domain model
+
+SQLAlchemy models, Pydantic schemas, repositories, and migration `002_phase2_domain_models` are in place. See [docs/DATA_MODEL.md](docs/DATA_MODEL.md) for entities, relationships, and event flow.
+
+```bash
+alembic upgrade head
+```
+
 ## Future phases
 
-Phase 2 adds event and session models under `app/models/`. New features plug into existing route modules (`/events`, `/metrics`, etc.) without restructuring the foundation.
+Phase 3 adds event ingestion via `/events`. Analytics plug into existing route modules without restructuring the foundation.
 
 ## Optional: video inspection (Phase 0)
 

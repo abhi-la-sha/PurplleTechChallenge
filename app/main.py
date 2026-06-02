@@ -1,4 +1,3 @@
-"""FastAPI application entrypoint."""
 
 import logging
 from contextlib import asynccontextmanager

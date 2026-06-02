@@ -1,4 +1,3 @@
-"""Pytest fixtures and dependency overrides."""
 
 from collections.abc import AsyncIterator
 from unittest.mock import AsyncMock, MagicMock

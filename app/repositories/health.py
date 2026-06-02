@@ -1,4 +1,3 @@
-"""Health check data access (extensible for DB probes in later phases)."""
 
 from sqlalchemy import text
 

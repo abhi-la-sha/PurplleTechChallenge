@@ -1,11 +1,3 @@
-"""Phase 1 initial migration (no business tables yet).
-
-Revision ID: 001_phase1_initial
-Revises:
-Create Date: 2026-06-01
-
-"""
-
 from typing import Sequence, Union
 
 revision: str = "001_phase1_initial"

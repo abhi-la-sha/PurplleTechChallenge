@@ -1,4 +1,3 @@
-"""Root metadata route."""
 
 from fastapi import APIRouter
 

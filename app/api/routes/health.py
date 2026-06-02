@@ -1,4 +1,3 @@
-"""Health check route."""
 
 from fastapi import APIRouter
 
