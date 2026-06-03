@@ -1,10 +1,12 @@
+from datetime import datetime
+from typing import Literal
+
 from pydantic import Field
 
 from app.schemas.common import APISchema
 
 
 class MetricsResponse(APISchema):
-    
     total_visitors: int = Field(..., ge=0)
     converted_visitors: int = Field(..., ge=0)
     conversion_rate: float = Field(..., ge=0.0)
@@ -42,13 +44,26 @@ class HeatmapZone(APISchema):
     zone_id: str
     visit_count: int = Field(..., ge=0)
     avg_dwell_seconds: float = Field(..., ge=0.0)
-    normalised_score: float = Field(..., ge=0.0, le=100.0, description="0–100 relative score")
+    normalised_score: float = Field(..., ge=0.0, le=100.0)
 
 
 class HeatmapResponse(APISchema):
-
     store_id: str
     zones: list[HeatmapZone]
     data_confidence: bool = Field(
         ..., description="False when fewer than 20 unique visitors in window"
     )
+
+
+class AnomalyItem(APISchema):
+    
+    anomaly_type: str
+    severity: Literal["INFO", "WARN", "CRITICAL"]
+    description: str
+    suggested_action: str
+    detected_at: datetime
+
+
+class AnomaliesResponse(APISchema):
+    store_id: str
+    anomalies: list[AnomalyItem]
