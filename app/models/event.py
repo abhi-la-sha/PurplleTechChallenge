@@ -1,11 +1,10 @@
-
 from __future__ import annotations
 
 import uuid
 from datetime import datetime
 from typing import TYPE_CHECKING, Any
 
-from sqlalchemy import DateTime, Enum, Float, ForeignKey, String, func
+from sqlalchemy import Boolean, DateTime, Enum, Float, ForeignKey, String, func
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -24,6 +23,9 @@ class Event(Base, UUIDPrimaryKeyMixin):
 
     __tablename__ = "events"
 
+    store_id: Mapped[str] = mapped_column(
+        String(64), nullable=False, default="", index=True
+    )
     visitor_id: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
     camera_id: Mapped[uuid.UUID | None] = mapped_column(
         ForeignKey("cameras.id", ondelete="SET NULL"),
@@ -55,6 +57,7 @@ class Event(Base, UUIDPrimaryKeyMixin):
         nullable=False,
         index=True,
     )
+    is_staff: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     confidence: Mapped[float | None] = mapped_column(Float, nullable=True)
     metadata_json: Mapped[dict[str, Any] | None] = mapped_column(JSONB, nullable=True)
     created_at: Mapped[datetime] = mapped_column(

@@ -1,4 +1,3 @@
-
 from fastapi import APIRouter
 
 from app.api.routes import (
@@ -9,6 +8,7 @@ from app.api.routes import (
     heatmap,
     metrics,
     root,
+    stores,
     transactions,
 )
 
@@ -17,6 +17,7 @@ api_router.include_router(root.router)
 api_router.include_router(health.router)
 api_router.include_router(events.router)
 api_router.include_router(metrics.router)
+api_router.include_router(stores.router)
 api_router.include_router(transactions.router)
 api_router.include_router(funnel.router)
 api_router.include_router(anomalies.router)

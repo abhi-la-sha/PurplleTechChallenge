@@ -1,4 +1,3 @@
-
 from __future__ import annotations
 
 import uuid
@@ -26,6 +25,14 @@ class EventRepository(BaseRepository):
 
     async def get_by_id(self, event_id: uuid.UUID) -> Event | None:
         return await self._session.get(Event, event_id)
+
+    async def get_existing_ids(self, event_ids: list[uuid.UUID]) -> set[uuid.UUID]:
+        """Return the subset of event_ids that already exist in the database."""
+        if not event_ids:
+            return set()
+        stmt = select(Event.id).where(Event.id.in_(event_ids))
+        result = await self._session.execute(stmt)
+        return set(result.scalars().all())
 
     async def list(
         self,
@@ -78,11 +85,7 @@ class EventRepository(BaseRepository):
         return list(result.scalars().all())
 
     async def exists(self, event_id: uuid.UUID) -> bool:
-        stmt = (
-            select(func.count(Event.id))
-            .where(Event.id == event_id)
-            .with_only_columns(func.count(Event.id))
-        )
+        stmt = select(func.count(Event.id)).where(Event.id == event_id)
         result = await self._session.execute(stmt)
         return int(result.scalar_one()) > 0
 

@@ -1,6 +1,7 @@
-"""Event ingestion service orchestration."""
 
+import logging
 import uuid
+from typing import Any
 
 from fastapi import HTTPException, status
 
@@ -13,11 +14,16 @@ from app.schemas.event import (
     EventListResponse,
     EventRead,
     EventStatsResponse,
+    IngestErrorItem,
+    IngestRequest,
+    IngestResponse,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class EventService:
-    """Coordinates event validation and persistence."""
+
 
     def __init__(self, repository: EventRepository) -> None:
         self._repository = repository
@@ -30,6 +36,60 @@ class EventService:
     async def create_bulk(self, payload: EventBulkCreateRequest) -> int:
         entities = [Event(**item.model_dump()) for item in payload.events]
         return await self._repository.create_many(entities)
+
+    async def ingest_batch(self, payload: IngestRequest) -> IngestResponse:
+        
+        all_ids = [item.event_id for item in payload.events]
+        existing_ids = await self._repository.get_existing_ids(all_ids)
+
+        new_events: list[Event] = []
+        errors: list[IngestErrorItem] = []
+        duplicate_count = 0
+
+        for item in payload.events:
+            if item.event_id in existing_ids:
+                duplicate_count += 1
+                continue
+            try:
+                metadata: dict[str, Any] = {
+                    "camera_id": item.camera_id,
+                    "zone_id": item.zone_id,
+                    "dwell_ms": item.dwell_ms,
+                }
+                if item.metadata:
+                    metadata.update(item.metadata)
+
+                event = Event(
+                    id=item.event_id,          # use client-provided UUID as PK
+                    store_id=item.store_id,
+                    visitor_id=item.visitor_id,
+                    event_type=item.event_type,
+                    timestamp=item.timestamp,
+                    is_staff=item.is_staff,
+                    confidence=item.confidence,
+                    metadata_json=metadata,
+                    # camera_id / zone_id UUID FKs left null —
+                    # raw string identifiers are in metadata_json
+                    camera_id=None,
+                    zone_id=None,
+                    session_id=None,
+                )
+                new_events.append(event)
+            except Exception as exc:
+                logger.warning(
+                    "ingest_item_error",
+                    extra={"event_id": str(item.event_id), "error": str(exc)},
+                )
+                errors.append(
+                    IngestErrorItem(event_id=str(item.event_id), error=str(exc))
+                )
+
+        ingested = await self._repository.create_many(new_events)
+        return IngestResponse(
+            ingested=ingested,
+            duplicates=duplicate_count,
+            errors=errors,
+        )
 
     async def get_event(self, event_id: uuid.UUID) -> EventRead:
         event = await self._repository.get_by_id(event_id)

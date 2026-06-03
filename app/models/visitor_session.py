@@ -1,4 +1,3 @@
-
 from __future__ import annotations
 
 import uuid
@@ -16,10 +15,12 @@ if TYPE_CHECKING:
 
 
 class VisitorSession(BaseModel):
-    """A single store visit for a tracked visitor."""
 
     __tablename__ = "visitor_sessions"
 
+    store_id: Mapped[str] = mapped_column(
+        String(64), nullable=False, default="", index=True
+    )
     visitor_id: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
     entry_time: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     exit_time: Mapped[datetime | None] = mapped_column(

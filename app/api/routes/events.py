@@ -10,9 +10,20 @@ from app.schemas.event import (
     EventListResponse,
     EventRead,
     EventStatsResponse,
+    IngestRequest,
+    IngestResponse,
 )
 
 router = APIRouter(prefix="/events", tags=["events"])
+
+
+@router.post("/ingest", response_model=IngestResponse, status_code=status.HTTP_200_OK)
+async def ingest_events(
+    payload: IngestRequest,
+    service: EventServiceDep,
+) -> IngestResponse:
+
+    return await service.ingest_batch(payload)
 
 
 @router.post("", response_model=EventRead, status_code=status.HTTP_201_CREATED)

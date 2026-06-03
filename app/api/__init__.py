@@ -1,1 +1,1 @@
-"""API layer: routes and dependency injection."""
+from app.api.routes import stores
