@@ -60,15 +60,17 @@ The platform is split into two independently runnable subsystems.
 
 ### Backend layer responsibilities
 
-| Layer | Location | Responsibility |
-|-------|----------|----------------|
-| Routes | `app/api/routes/` | HTTP binding, Pydantic validation, dependency injection |
-| Services | `app/services/` | Business rules (conversion rate, anomaly thresholds, funnel stages) |
-| Repositories | `app/repositories/` | Async SQL queries — no formulas or business decisions |
-| Models | `app/models/` | SQLAlchemy ORM declarations |
-| Schemas | `app/schemas/` | Pydantic v2 request/response contracts |
-| Core | `app/core/` | Settings, structured JSON logging, middleware |
-| DB | `app/db/` | Async engine, session factory, lifespan management |
+
+| Layer        | Location            | Responsibility                                                      |
+| ------------ | ------------------- | ------------------------------------------------------------------- |
+| Routes       | `app/api/routes/`   | HTTP binding, Pydantic validation, dependency injection             |
+| Services     | `app/services/`     | Business rules (conversion rate, anomaly thresholds, funnel stages) |
+| Repositories | `app/repositories/` | Async SQL queries — no formulas or business decisions               |
+| Models       | `app/models/`       | SQLAlchemy ORM declarations                                         |
+| Schemas      | `app/schemas/`      | Pydantic v2 request/response contracts                              |
+| Core         | `app/core/`         | Settings, structured JSON logging, middleware                       |
+| DB           | `app/db/`           | Async engine, session factory, lifespan management                  |
+
 
 ### Deployed topology
 
@@ -80,11 +82,13 @@ Docker Compose
 
 Schema migrations are managed by **Alembic** with three sequential revisions:
 
-| Revision | Description |
-|----------|-------------|
-| `001_phase1_initial` | Empty schema baseline |
-| `002_phase2_domain_models` | cameras, zones, visitor_sessions, transactions, events, EventType enum |
-| `003_add_store_id_is_staff` | `store_id` on events + visitor_sessions; `is_staff` on events |
+
+| Revision                    | Description                                                            |
+| --------------------------- | ---------------------------------------------------------------------- |
+| `001_phase1_initial`        | Empty schema baseline                                                  |
+| `002_phase2_domain_models`  | cameras, zones, visitor_sessions, transactions, events, EventType enum |
+| `003_add_store_id_is_staff` | `store_id` on events + visitor_sessions; `is_staff` on events          |
+
 
 ---
 
@@ -150,18 +154,20 @@ batch_runner.py  ──  iterates every VideoConfig per store
 
 `StaffDetector` examines the torso region (30–70% of bounding box height) in HSV colour space:
 
-- **`dark` method (Store 1 — black uniform):** V-channel < 70 for > 40% of torso pixels.
-- **`hue` method (Store 2 — pink uniform):** hue in [145, 175] for > 30% of valid (S ≥ 100, V ≥ 80) torso pixels.
+- `**dark` method (Store 1 — black uniform):** V-channel < 70 for > 40% of torso pixels.
+- `**hue` method (Store 2 — pink uniform):** hue in [145, 175] for > 30% of valid (S ≥ 100, V ≥ 80) torso pixels.
 
 Staff events are stored in the database but excluded from all visitor-facing metrics.
 
 ### Event logic
 
-| Video type | Detection mechanism | Events generated |
-|------------|---------------------|-----------------|
-| `entry` | `LineCrossingDetector` — horizontal line at configurable `line_y` (default 0.50) | `ENTRY`, `EXIT` |
-| `zone` | Foot-point inside a configured rectangular region | `ZONE_ENTER`, `ZONE_EXIT`, `ZONE_DWELL` (every 30 s while inside) |
-| `billing` | Foot-point inside billing region | `BILLING_QUEUE_JOIN`, `BILLING_QUEUE_ABANDON` |
+
+| Video type | Detection mechanism                                                              | Events generated                                                  |
+| ---------- | -------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| `entry`    | `LineCrossingDetector` — horizontal line at configurable `line_y` (default 0.50) | `ENTRY`, `EXIT`                                                   |
+| `zone`     | Foot-point inside a configured rectangular region                                | `ZONE_ENTER`, `ZONE_EXIT`, `ZONE_DWELL` (every 30 s while inside) |
+| `billing`  | Foot-point inside billing region                                                 | `BILLING_QUEUE_JOIN`, `BILLING_QUEUE_ABANDON`                     |
+
 
 ### Annotated video output
 
@@ -215,42 +221,48 @@ TRANSACTIONS
 
 **events** (central fact table)
 
-| Column | Type | Notes |
-|--------|------|-------|
-| id | UUID PK | client-provided for idempotency |
-| store_id | VARCHAR(64) INDEX | added in migration 003 |
-| visitor_id | VARCHAR(64) INDEX | |
-| camera_id | UUID FK nullable | |
-| zone_id | UUID FK nullable | |
-| session_id | UUID FK nullable | |
-| event_type | ENUM INDEX | see EventType enum below |
-| timestamp | TIMESTAMPTZ INDEX | when the event occurred in the video |
-| is_staff | BOOL | staff flag from CV pipeline |
-| confidence | FLOAT | detector confidence 0–1 |
-| metadata_json | JSONB | type-specific payload |
-| created_at | TIMESTAMPTZ | append-only |
+
+| Column        | Type              | Notes                                |
+| ------------- | ----------------- | ------------------------------------ |
+| id            | UUID PK           | client-provided for idempotency      |
+| store_id      | VARCHAR(64) INDEX | added in migration 003               |
+| visitor_id    | VARCHAR(64) INDEX |                                      |
+| camera_id     | UUID FK nullable  |                                      |
+| zone_id       | UUID FK nullable  |                                      |
+| session_id    | UUID FK nullable  |                                      |
+| event_type    | ENUM INDEX        | see EventType enum below             |
+| timestamp     | TIMESTAMPTZ INDEX | when the event occurred in the video |
+| is_staff      | BOOL              | staff flag from CV pipeline          |
+| confidence    | FLOAT             | detector confidence 0–1              |
+| metadata_json | JSONB             | type-specific payload                |
+| created_at    | TIMESTAMPTZ       | append-only                          |
+
 
 **visitor_sessions**
 
-| Column | Type | Notes |
-|--------|------|-------|
-| id | UUID PK | |
-| visitor_id | VARCHAR(64) | assigned by CV pipeline |
-| store_id | VARCHAR(64) | added in migration 003 |
-| entry_time | TIMESTAMPTZ | |
-| exit_time | TIMESTAMPTZ | nullable until exit |
-| session_duration_seconds | INT | populated on exit |
-| converted | BOOL | set when POS correlation succeeds |
+
+| Column                   | Type        | Notes                             |
+| ------------------------ | ----------- | --------------------------------- |
+| id                       | UUID PK     |                                   |
+| visitor_id               | VARCHAR(64) | assigned by CV pipeline           |
+| store_id                 | VARCHAR(64) | added in migration 003            |
+| entry_time               | TIMESTAMPTZ |                                   |
+| exit_time                | TIMESTAMPTZ | nullable until exit               |
+| session_duration_seconds | INT         | populated on exit                 |
+| converted                | BOOL        | set when POS correlation succeeds |
+
 
 **transactions**
 
-| Column | Type | Notes |
-|--------|------|-------|
-| id | UUID PK | |
-| transaction_id | VARCHAR UNIQUE | encoded as `{store_id}\|{txn_id}` for store scoping |
-| transaction_timestamp | TIMESTAMPTZ | |
-| basket_value | NUMERIC | ≥ 0 |
-| visitor_session_id | UUID FK nullable | |
+
+| Column                | Type             | Notes                                              |
+| --------------------- | ---------------- | -------------------------------------------------- |
+| id                    | UUID PK          |                                                    |
+| transaction_id        | VARCHAR UNIQUE   | encoded as `{store_id}|{txn_id}` for store scoping |
+| transaction_timestamp | TIMESTAMPTZ      |                                                    |
+| basket_value          | NUMERIC          | ≥ 0                                                |
+| visitor_session_id    | UUID FK nullable |                                                    |
+
 
 ---
 
@@ -260,14 +272,16 @@ TRANSACTIONS
 
 Returns aggregate metrics for a store:
 
-| Metric | Computation |
-|--------|-------------|
-| `unique_visitors` | COUNT non-staff visitor_sessions |
-| `conversion_rate` | (converted / unique_visitors) × 100 |
-| `average_dwell_ms` | AVG dwell from ZONE_DWELL metadata |
-| `queue_depth` | COUNT active BILLING_QUEUE_JOIN without paired ABANDON |
-| `abandonment_rate` | (abandoned / joined) × 100 |
-| `average_basket_value` | AVG basket_value from transactions |
+
+| Metric                 | Computation                                            |
+| ---------------------- | ------------------------------------------------------ |
+| `unique_visitors`      | COUNT non-staff visitor_sessions                       |
+| `conversion_rate`      | (converted / unique_visitors) × 100                    |
+| `average_dwell_ms`     | AVG dwell from ZONE_DWELL metadata                     |
+| `queue_depth`          | COUNT active BILLING_QUEUE_JOIN without paired ABANDON |
+| `abandonment_rate`     | (abandoned / joined) × 100                             |
+| `average_basket_value` | AVG basket_value from transactions                     |
+
 
 All floats are rounded to 2 decimal places. Division is safe (returns 0.0 when denominator is zero).
 
@@ -287,11 +301,13 @@ Zone visit counts and average dwell time, with popularity normalised linearly to
 
 ### `GET /stores/{store_id}/anomalies`
 
-| Anomaly | Trigger | Severities |
-|---------|---------|------------|
-| `BILLING_QUEUE_SPIKE` | queue depth ≥ 5 (WARN) or ≥ 10 (CRITICAL) | WARN, CRITICAL |
-| `CONVERSION_DROP` | conversion < rolling average by ≥ 20% (WARN) or ≥ 40% (CRITICAL) | WARN, CRITICAL |
-| `DEAD_ZONE` | no zone events within configured window | INFO, WARN |
+
+| Anomaly               | Trigger                                                          | Severities     |
+| --------------------- | ---------------------------------------------------------------- | -------------- |
+| `BILLING_QUEUE_SPIKE` | queue depth ≥ 5 (WARN) or ≥ 10 (CRITICAL)                        | WARN, CRITICAL |
+| `CONVERSION_DROP`     | conversion < rolling average by ≥ 20% (WARN) or ≥ 40% (CRITICAL) | WARN, CRITICAL |
+| `DEAD_ZONE`           | no zone events within configured window                          | INFO, WARN     |
+
 
 ### `GET /health`
 
@@ -307,23 +323,26 @@ Global aggregate across all stores.
 
 ### EventType enum
 
-| Value | Source camera | Key `metadata_json` fields |
-|-------|---------------|---------------------------|
-| `ENTRY` | STORE_00x_CAM_ENTRY | `direction`, `source_video` |
-| `EXIT` | STORE_00x_CAM_ENTRY | `direction` |
-| `ZONE_ENTER` | CAM_ZONE_* | `zone_id`, `source_video` |
-| `ZONE_EXIT` | CAM_ZONE_* | `zone_id` |
-| `ZONE_DWELL` | CAM_ZONE_* | `zone_id`, `dwell_ms` |
-| `BILLING_QUEUE_JOIN` | CAM_BILLING | `queue_position` |
-| `BILLING_QUEUE_ABANDON` | CAM_BILLING | `dwell_ms` |
-| `PURCHASE` | POS correlation | `transaction_id`, `basket_value` |
-| `REENTRY` | any entry camera | `previous_session_id` |
+
+| Value                   | Source camera       | Key `metadata_json` fields       |
+| ----------------------- | ------------------- | -------------------------------- |
+| `ENTRY`                 | STORE_00x_CAM_ENTRY | `direction`, `source_video`      |
+| `EXIT`                  | STORE_00x_CAM_ENTRY | `direction`                      |
+| `ZONE_ENTER`            | CAM_ZONE_*          | `zone_id`, `source_video`        |
+| `ZONE_EXIT`             | CAM_ZONE_*          | `zone_id`                        |
+| `ZONE_DWELL`            | CAM_ZONE_*          | `zone_id`, `dwell_ms`            |
+| `BILLING_QUEUE_JOIN`    | CAM_BILLING         | `queue_position`                 |
+| `BILLING_QUEUE_ABANDON` | CAM_BILLING         | `dwell_ms`                       |
+| `PURCHASE`              | POS correlation     | `transaction_id`, `basket_value` |
+| `REENTRY`               | any entry camera    | `previous_session_id`            |
+
 
 ### Event log JSONL format
 
 Events are emitted by the CV pipeline and logged in JSONL format (one JSON object per line). The schema varies by event type:
 
 **Entry / Exit events**
+
 ```json
 {
   "event_type": "entry",
@@ -342,6 +361,7 @@ Events are emitted by the CV pipeline and logged in JSONL format (one JSON objec
 ```
 
 **Zone enter / exit events**
+
 ```json
 {
   "event_type": "zone_entered",
@@ -362,6 +382,7 @@ Events are emitted by the CV pipeline and logged in JSONL format (one JSON objec
 ```
 
 **Queue completed / abandoned events**
+
 ```json
 {
   "queue_event_id": "cfd8e3c5-7aa0-4ea3-9b59-692d50da8308",
@@ -393,37 +414,283 @@ Events are emitted by the CV pipeline and logged in JSONL format (one JSON objec
 
 ### Prerequisites
 
-- Docker and Docker Compose
-- Python 3.11+
-- `pip install ultralytics supervision fastapi sqlalchemy alembic pydantic`
+- Python 3.12+
+- PostgreSQL 15+
+- Git
+- Docker (optional)
 
-### Start the backend
+---
 
-```bash
-docker compose up --build
+### 1. Clone the Repository
+
+ 
+
+```
+git clone https://github.com/abhi-la-sha/PurplleTechChallenge
+cd PurplleTechChallenge
 ```
 
-This starts:
-- `api` on `http://localhost:8000` (FastAPI + Uvicorn)
-- `postgres` on `localhost:5432` (PostgreSQL 16)
+ 
 
-### Run Alembic migrations
+---
 
-```bash
+### 2. Create and Activate Virtual Environment
+
+### Windows
+
+```
+python -m venv venv
+venv\Scripts\activate
+```
+
+ 
+
+### Linux / Mac
+
+```
+python -m venv venv
+source venv/bin/activate
+```
+
+ 
+
+---
+
+### 3. Install Dependencies
+
+ 
+
+```
+pip install -r requirements.txt
+```
+
+ 
+
+---
+
+### 4. Configure Environment Variables
+
+Create a `.env` file:
+
+ 
+
+```
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/purplle
+```
+
+ 
+
+Update values according to your local PostgreSQL setup.
+
+---
+
+### 5. Create Database
+
+```
+CREATE DATABASE purplle;
+```
+
+ 
+
+Run migrations:
+
+```
 alembic upgrade head
 ```
 
-### Run the CV pipeline
+ 
 
-```bash
-python cv/batch_runner.py
+---
+
+### 6. Start the FastAPI Backend
+
+```
+uvicorn app.main:app --reload
 ```
 
-Configure store and video paths in `cv/config.py` before running.
+ 
 
-### Interactive API docs
+API will be available at:
 
-Visit `http://localhost:8000/docs` for the auto-generated OpenAPI UI.
+```
+http://localhost:8000
+```
+
+ 
+
+Interactive API documentation:
+
+```
+http://localhost:8000/docs
+```
+
+ 
+
+---
+
+### 7. Verify Application Health
+
+```
+curl http://localhost:8000/health
+```
+
+ 
+
+ 
+
+---
+
+### 8. Run Computer Vision Pipeline
+
+Ensure sample videos are placed under:
+
+```
+data/videos/
+├── store1/
+│   ├── entry.mp4
+│   ├── zone 1.mp4
+│   └── billing.mp4
+└── store2/
+    ├── entry.mp4
+    ├── zone 1.mp4
+    └── billing.mp4
+```
+
+ 
+
+Run processing:
+
+```
+python -m cv.batch_runner --store STORE_001
+```
+
+ 
+
+Or process all stores:
+
+```
+python -m cv.batch_runner
+```
+
+ 
+
+The pipeline will:
+
+- Detect customers using YOLOv8n
+- Track visitors using ByteTrack
+- Generate retail events
+- Send events to the FastAPI ingestion API
+- Produce annotated videos
+
+---
+
+### 9. Generated Outputs
+
+Annotated videos:
+
+```
+analysis_frames/
+```
+
+ 
+
+Generated events:
+
+```
+PostgreSQL Database
+```
+
+ 
+
+Event log export:
+
+```
+event_log.jsonl
+```
+
+ 
+
+---
+
+### 10. Explore Analytics APIs
+
+### Store Metrics
+
+```
+GET /stores/{store_id}/metrics
+```
+
+Example:
+
+```
+curl http://localhost:8000/stores/STORE_001/metrics
+```
+
+ 
+
+---
+
+### Funnel Analytics
+
+```
+GET /analytics/funnels
+```
+
+ 
+
+---
+
+### Heatmaps
+
+```
+GET /analytics/heatmaps
+```
+
+ 
+
+---
+
+### Anomaly Detection
+
+```
+GET /analytics/anomalies
+```
+
+ 
+
+---
+
+### Event History
+
+```
+GET /events
+
+```
+
+ 
+
+---
+
+### View Live Dashboard
+
+Open:
+
+```
+http://localhost:8000/dashboard
+```
+
+---
+
+ 
+
+**Expected output includes:**
+
+- **Unique Visitors**
+- **Conversion Rate**
+- **Average Dwell Time**
+- **Queue Depth**
+- **Abandonment Rate**
+- **Basket Value Metrics**
 
 ---
 
@@ -439,17 +706,19 @@ pytest
 
 ## 10. Technology Choices
 
-| Component | Choice | Key reason |
-|-----------|--------|-----------|
-| Object detection | YOLOv8n | Real-time CPU throughput; 6 MB model; clean Supervision integration |
-| Multi-object tracking | ByteTrack (via Supervision) | Two-stage matching handles occlusion without an appearance model |
-| Backend framework | FastAPI | Native async, Pydantic v2 integration, auto OpenAPI docs |
-| Database | PostgreSQL 16 | JSONB for metadata, UUID PKs, ACID guarantees, Alembic ENUM support |
-| ORM | SQLAlchemy 2 (async) | `AsyncSession` for non-blocking DB access |
-| Schema validation | Pydantic v2 | Shared by FastAPI routes and ORM `model_validate()` |
-| Migrations | Alembic | Native PostgreSQL ENUM management |
-| Containerisation | Docker Compose | Portable developer and CI environment |
-| Testing | Pytest + dependency overrides | Mock injection without a live database |
+
+| Component             | Choice                        | Key reason                                                          |
+| --------------------- | ----------------------------- | ------------------------------------------------------------------- |
+| Object detection      | YOLOv8n                       | Real-time CPU throughput; 6 MB model; clean Supervision integration |
+| Multi-object tracking | ByteTrack (via Supervision)   | Two-stage matching handles occlusion without an appearance model    |
+| Backend framework     | FastAPI                       | Native async, Pydantic v2 integration, auto OpenAPI docs            |
+| Database              | PostgreSQL 16                 | JSONB for metadata, UUID PKs, ACID guarantees, Alembic ENUM support |
+| ORM                   | SQLAlchemy 2 (async)          | `AsyncSession` for non-blocking DB access                           |
+| Schema validation     | Pydantic v2                   | Shared by FastAPI routes and ORM `model_validate()`                 |
+| Migrations            | Alembic                       | Native PostgreSQL ENUM management                                   |
+| Containerisation      | Docker Compose                | Portable developer and CI environment                               |
+| Testing               | Pytest + dependency overrides | Mock injection without a live database                              |
+
 
 See [CHOICES.md](CHOICES.md) for full rationale and alternatives considered.
 
@@ -474,6 +743,7 @@ See [CHOICES.md](CHOICES.md) for full rationale and alternatives considered.
 ## 12. Future Improvements
 
 ### Computer Vision
+
 - Upgrade to YOLOv8s/m for improved accuracy on GPU hardware
 - Dedicated re-ID model (OSNet, CLIP) for cross-camera visitor matching
 - Live RTSP stream processing
@@ -481,6 +751,7 @@ See [CHOICES.md](CHOICES.md) for full rationale and alternatives considered.
 - Zone polygon editor for store managers
 
 ### Backend & API
+
 - Materialised metric views or TimescaleDB hypertables for analytics at scale
 - Proper `store_id` column on transactions (remove composite key encoding)
 - `stores` table with name, timezone, and operating hours
@@ -489,13 +760,16 @@ See [CHOICES.md](CHOICES.md) for full rationale and alternatives considered.
 - Webhook alerts for anomaly events
 
 ### Infrastructure
+
 - PgBouncer connection pooling for high-concurrency deployments
 - Horizontal FastAPI scaling behind a load balancer
 - CI/CD pipeline for automated test runs and Docker image builds
 - Prometheus / OpenTelemetry metrics exporter and distributed tracing
 
 ### Analytics
+
 - Conversion attribution correlating `BILLING_QUEUE_JOIN` with POS transactions by timestamp
 - Re-entry analytics for first-time vs. returning visitor segmentation
 - Cross-store comparison for chain-level dashboards
 - Time-bucketed metrics API (hourly/daily/weekly) for trend charts
+
