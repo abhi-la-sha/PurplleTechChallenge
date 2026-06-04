@@ -20,5 +20,5 @@ analysis_frames/
 *.db
 alembic/__pycache__/
 data/videos/
-analysis_frames/*
+
 

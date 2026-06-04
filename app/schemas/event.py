@@ -8,8 +8,6 @@ from app.models.enums import EventType
 from app.schemas.common import APISchema
 
 
-# ── existing schemas (unchanged) ─────────────────────────────────────────────
-
 class EventBase(APISchema):
     visitor_id: str = Field(..., min_length=1, max_length=64)
     camera_id: uuid.UUID | None = None
@@ -45,10 +43,9 @@ class EventStatsResponse(APISchema):
     total_events: int
 
 
-# ── new ingest schemas ────────────────────────────────────────────────────────
 
 class IngestEventItem(APISchema):
-    """Single event in the pipeline's schema format (matches challenge spec)."""
+
 
     event_id: uuid.UUID = Field(..., description="Client-generated UUID — used for idempotency")
     store_id: str = Field(..., min_length=1, max_length=64)

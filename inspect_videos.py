@@ -4,8 +4,8 @@ from pathlib import Path
 
 import cv2
 
-VIDEO_DIR = Path("data/videos")
-OUTPUT_DIR = Path("analysis_frames")
+VIDEO_DIR = Path("data/videos/store1")
+OUTPUT_DIR = Path("analysis_frames/store1")
 VIDEO_EXTENSIONS = {".mp4", ".avi", ".mkv", ".mov", ".webm", ".m4v"}
 
 

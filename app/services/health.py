@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 from app.repositories.health import HealthRepository
-from app.schemas.health import HealthResponse
+from app.schemas.health import HealthResponse, StoreHealth
 
 STALE_THRESHOLD_MINUTES = 10
 
