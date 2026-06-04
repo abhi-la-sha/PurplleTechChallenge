@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Store Intelligence Dashboard</title>
+</head>
+<body>
+
+<h1>STORE_001 LIVE DASHBOARD</h1>
+
+<div>
+    Visitors:
+    <span id="visitors">0</span>
+</div>
+
+<div>
+    Dwell Time:
+    <span id="dwell">0</span>
+</div>
+
+<div>
+    Conversion:
+    <span id="conversion">0</span>
+</div>
+
+<div>
+    Queue Depth:
+    <span id="queue">0</span>
+</div>
+
+<h2>Recent Events</h2>
+
+<ul id="events"></ul>
+
+<script>
+
+async function refresh() {
+
+    let metrics =
+        await fetch("/stores/STORE_001/metrics");
+
+    metrics = await metrics.json();
+
+    document.getElementById("visitors").innerText =
+        metrics.unique_visitors;
+
+    document.getElementById("dwell").innerText =
+        metrics.average_dwell_time_seconds;
+
+    document.getElementById("conversion").innerText =
+        metrics.conversion_rate;
+
+    document.getElementById("queue").innerText =
+        metrics.queue_depth;
+
+    let events =
+        await fetch("/events?limit=10");
+
+    events = await events.json();
+
+    let ul =
+        document.getElementById("events");
+
+    ul.innerHTML = "";
+
+    events.items.forEach(e => {
+
+        let li =
+            document.createElement("li");
+
+        li.textContent =
+            `${e.event_type} - ${e.visitor_id}`;
+
+        ul.appendChild(li);
+    });
+}
+
+refresh();
+
+setInterval(refresh, 2000);
+
+</script>
+
+</body>
+</html>

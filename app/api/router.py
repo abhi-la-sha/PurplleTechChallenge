@@ -10,6 +10,7 @@ from app.api.routes import (
     root,
     stores,
     transactions,
+    dashboard,
 )
 
 api_router = APIRouter()
@@ -22,3 +23,4 @@ api_router.include_router(transactions.router)
 api_router.include_router(funnel.router)
 api_router.include_router(anomalies.router)
 api_router.include_router(heatmap.router)
+api_router.include_router(dashboard.router)
