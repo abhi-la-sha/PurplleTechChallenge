@@ -142,7 +142,8 @@ def process_entry_video(
                 continue
             cx, cy = bbox_centre(person.bbox)
             norm_pos = normalise_point((cx, cy), frame_w, frame_h)
-            visitor_id, is_reentry = visitor_tracker.get_or_create(tid, norm_pos)
+            visitor_id, is_reentry = visitor_tracker.get_or_create(tid, entry_position=norm_pos,embedding=person.embedding)
+            #visitor_id, is_reentry = visitor_tracker.get_or_create(tid, norm_pos)
             is_staff = staff_flags.get(tid, False)
             seq = visitor_tracker.next_seq(visitor_id)
 
@@ -173,7 +174,9 @@ def process_entry_video(
                 continue
             cx, cy = bbox_centre(person.bbox)
             norm_pos = normalise_point((cx, cy), frame_w, frame_h)
-            visitor_id, _ = visitor_tracker.get_or_create(tid)
+            embedding = person.embedding if person else None
+            visitor_id, _ = visitor_tracker.get_or_create(tid, embedding=embedding)
+            #visitor_id, _ = visitor_tracker.get_or_create(tid)
             is_staff = staff_flags.get(tid, False)
             seq = visitor_tracker.next_seq(visitor_id)
             visitor_tracker.mark_exit(tid, norm_pos)
@@ -268,7 +271,10 @@ def process_zone_video(
         for person in persons:
             tid = person.track_id
             is_staff = staff_flags.get(tid, False)
-            visitor_id, _ = visitor_tracker.get_or_create(tid)
+            #visitor_id, _ = visitor_tracker.get_or_create(tid)
+            person = next((p for p in persons if p.track_id == tid), None)
+            embedding = person.embedding if person else None
+            visitor_id, _ = visitor_tracker.get_or_create(tid,embedding=embedding)
             unique_visitor_ids.add(visitor_id)
             if is_staff:
                 staff_ids.add(visitor_id)
@@ -393,7 +399,10 @@ def process_billing_video(
                 staff_ids.add(visitor_tracker.get_or_create(tid)[0])
                 continue
 
-            visitor_id, _ = visitor_tracker.get_or_create(tid)
+            person = next((p for p in persons if p.track_id == tid), None)
+            embedding = person.embedding if person else None
+            visitor_id, _ = visitor_tracker.get_or_create(tid,embedding=embedding)
+            #visitor_id, _ = visitor_tracker.get_or_create(tid)
             unique_visitor_ids.add(visitor_id)
 
             if tid not in in_queue:

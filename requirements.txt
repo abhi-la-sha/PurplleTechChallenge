@@ -1,4 +1,4 @@
-# Store Intelligence API (Phase 1)
+# Store Intelligence API 
 fastapi>=0.115.0
 uvicorn[standard]>=0.32.0
 sqlalchemy[asyncio]>=2.0.36
@@ -14,3 +14,10 @@ pytest>=8.3.0
 pytest-asyncio>=0.24.0
 httpx>=0.28.0
 aiosqlite>=0.20.0
+
+#CV
+opencv-python>=4.8.0
+supervision
+ultralytics
+numpy
+requests

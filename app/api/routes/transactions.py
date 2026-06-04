@@ -1,4 +1,3 @@
-"""Transaction ingestion API routes."""
 
 from datetime import datetime
 

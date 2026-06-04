@@ -1,6 +1,5 @@
-
 from __future__ import annotations
-
+import cv2
 import logging
 from dataclasses import dataclass
 
@@ -16,7 +15,7 @@ class TrackedPerson:
     track_id: int
     bbox: tuple[float, float, float, float]  # x1, y1, x2, y2
     confidence: float
-
+    embedding: np.ndarray | None = None
 
 class PersonTracker:
 
@@ -33,6 +32,11 @@ class PersonTracker:
         self._confidence = confidence
         self._person_class = person_class_id
         self._tracker = sv.ByteTrack()
+
+    # def _get_person_crop(self, frame, bbox):
+    #     x1, y1, x2, y2 = map(int, bbox)
+    #     crop = frame[y1:y2, x1:x2]
+    #     return crop
 
     def update(self, frame: np.ndarray) -> list[TrackedPerson]:
         
@@ -61,14 +65,50 @@ class PersonTracker:
                 if detections.confidence is not None
                 else 1.0
             )
+            embedding = self._get_embedding(frame, (x1, y1, x2, y2))
             persons.append(
                 TrackedPerson(
                     track_id=int(track_id),
                     bbox=(float(x1), float(y1), float(x2), float(y2)),
                     confidence=conf,
+                    embedding=embedding,
                 )
             )
         return persons
+
+    def _get_embedding(self, frame: np.ndarray, bbox):
+
+        x1, y1, x2, y2 = map(int, bbox)
+
+        # crop safety check
+        if x2 <= x1 or y2 <= y1:
+            return None
+
+        crop = frame[y1:y2, x1:x2]
+
+        if crop.size == 0:
+            return None
+
+        try:
+            # resize to fixed shape for consistency
+            crop = cv2.resize(crop, (32, 64))
+
+            # grayscale reduces noise + makes embedding stable
+            crop = cv2.cvtColor(crop, cv2.COLOR_BGR2GRAY)
+
+            # flatten → lightweight appearance signature
+            embedding = crop.flatten().astype(np.float32)
+
+            # normalize (important for cosine similarity later)
+            norm = np.linalg.norm(embedding)
+            if norm > 0:
+                embedding = embedding / norm
+
+            return embedding
+
+        except Exception as e:
+            logger.debug("Embedding failed: %s", e)
+            return None
 
     def reset(self) -> None:
         
